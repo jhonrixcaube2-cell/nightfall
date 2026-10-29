@@ -1,0 +1,22 @@
+/* ===== Mobile / touch controls: virtual joystick, look drag, action buttons. Reuses the keyboard handlers via synthetic key events. ===== */
+(function(){const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0||/[?&]touch=1/.test(location.search);if(!isTouch)return;
+ noLock=true;document.body.classList.add('touch');const T=document.createElement('div');T.id='touch';
+ T.innerHTML='<div id="tl"><div id="jb"><div id="jk"></div></div></div><div id="tr"></div><div id="tb"></div>';document.body.appendChild(T);
+ const fk=(code,d)=>window.dispatchEvent(new KeyboardEvent(d?'keydown':'keyup',{code,key:code,bubbles:true,cancelable:true}));
+ const btn=(id,label,cls,down,up)=>{const b=document.createElement('button');b.id=id;b.className='tbn '+cls;b.textContent=label;b.addEventListener('pointerdown',e=>{e.preventDefault();down&&down();b.classList.add('d')});
+  const end=e=>{e.preventDefault();up&&up();b.classList.remove('d')};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);b.addEventListener('contextmenu',e=>e.preventDefault());$('tb').appendChild(b);return b};
+ btn('tbE','USE','sv',()=>fk('KeyE',1),()=>fk('KeyE',0));btn('tbF','LIGHT','sv',()=>fk('KeyF',1),()=>fk('KeyF',0));btn('tbR','BATT','sv',()=>fk('KeyR',1),()=>fk('KeyR',0));
+ btn('tbS','RUN','sv',()=>{tsprint=!tsprint;$('tbS').classList.toggle('on',tsprint)});btn('tbC','CROUCH','sv',()=>{tcrouch=!tcrouch;$('tbC').classList.toggle('on',tcrouch)});
+ btn('tbP','PING','all',()=>ping());btn('tbT','CHAT','all',()=>fk('KeyT',1));
+ btn('tbA','ATTACK','mn',()=>abil('attack'));btn('tb1','RUSH','mn',()=>abil('rush'));btn('tb2','TRACK','mn',()=>abil('track'));btn('tb3','DARK','mn',()=>abil('dark'));
+ btn('tbM','MENU','all',()=>{if(inGame&&!SM){paused=true;view('pause')}});
+ const tl=$('tl'),jb=$('jb'),jk=$('jk');let jid=null,jo=null;
+ tl.addEventListener('pointerdown',e=>{jid=e.pointerId;try{tl.setPointerCapture(jid)}catch(x){}jo={x:e.clientX,y:e.clientY};jb.style.left=(jo.x-60)+'px';jb.style.top=(jo.y-60)+'px';jb.classList.add('on')});
+ tl.addEventListener('pointermove',e=>{if(e.pointerId!=jid)return;let dx=e.clientX-jo.x,dy=e.clientY-jo.y;const l=Math.hypot(dx,dy),m=60;if(l>m){dx*=m/l;dy*=m/l}joy.x=dx/m;joy.y=dy/m;jk.style.transform=`translate(${dx}px,${dy}px)`});
+ const je=e=>{if(e.pointerId!=jid)return;jid=null;joy.x=joy.y=0;jk.style.transform='';jb.classList.remove('on')};tl.addEventListener('pointerup',je);tl.addEventListener('pointercancel',je);
+ const tr=$('tr');let lid=null,lx=0,ly=0;tr.addEventListener('pointerdown',e=>{lid=e.pointerId;try{tr.setPointerCapture(lid)}catch(x){}lx=e.clientX;ly=e.clientY});
+ tr.addEventListener('pointermove',e=>{if(e.pointerId!=lid||!inGame||paused||SM)return;P.yaw-=(e.clientX-lx)*.0065*cfg.sens;P.pitch=clamp(P.pitch-(e.clientY-ly)*.0065*cfg.sens,-1.45,1.45);lx=e.clientX;ly=e.clientY});
+ const le=e=>{if(e.pointerId==lid)lid=null};tr.addEventListener('pointerup',le);tr.addEventListener('pointercancel',le);
+ document.addEventListener('gesturestart',e=>e.preventDefault());document.addEventListener('contextmenu',e=>e.preventDefault());
+ setInterval(()=>{T.style.display=inGame&&!SM&&!paused?'block':'none';const mn=myRole=='monster'||myRole=='infected',sv=myRole=='survivor';document.body.classList.toggle('role-mn',mn);document.body.classList.toggle('role-sv',sv);$('tb2').textContent=myRole=='infected'?'SENSE':'TRACK';$('tb1').textContent=myRole=='infected'?'LUNGE':'RUSH';$('tb3').style.display=myRole=='monster'?'':'none'},250);
+})();

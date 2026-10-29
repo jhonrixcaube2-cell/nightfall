@@ -1,6 +1,7 @@
 /* collision helpers (needed while the world is built) */
 function tileSolid(c,r){return c<0||r<0||c>20||r>11||MAPS[curF][r][c]=='#'}
 function blocked(x,z,q=.35){for(const[a,b]of[[q,q],[-q,q],[q,-q],[-q,-q]])if(tileSolid(Math.floor((x+a)/CS),Math.floor((z+b)/CS)))return 1;for(const p of PROPS[curF])if(x+q>p[0]&&x-q<p[2]&&z+q>p[1]&&z-q<p[3])return 1;return 0}
+function freeSpot(x,z){if(!blocked(x,z))return[x,z];for(let r=.3;r<=4.5;r+=.3)for(let a=0;a<24;a++){const t=a/24*6.2832,nx=x+Math.cos(t)*r,nz=z+Math.sin(t)*r;if(!blocked(nx,nz))return[nx,nz]}return null}
 /* ---- scene ---- */
 const R=new THREE.WebGLRenderer({canvas:$('cv'),antialias:false}),sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(72,1,.05,60);cam.rotation.order='YXZ';sc.add(cam);
 sc.background=new THREE.Color(0x030405);sc.fog=new THREE.FogExp2(0x030405,.06);const amb=new THREE.AmbientLight(0x1a2226,.3);sc.add(amb);
@@ -85,7 +86,7 @@ function dress(){const TX=[10,26,42,58,74];
  [22,38,54,70].forEach(x=>{bC(M.ext,.08,.4,x,1.15,20.15);bC(M.dark,.04,.1,x,1.4,20.15)});
  for(let x=6;x<76;x+=8)cable([[x,2.75,20.3],[x+4,2.55,20.3],[x+8,2.75,20.3]]);for(let i=0;i<8;i++){const x=8+i*9+rs()*3;cable([[x,3.2,22+rs()*4],[x+.2,2.4,22.1+rs()*4],[x+.1,1.8,22.2+rs()*4]])}
  poster(0,22,1.7,20.05,0);poster(1,55,1.7,20.05,0);poster(2,40,1.7,27.95,Math.PI);poster(0,70,1.7,27.95,Math.PI);poster(2,4.05,1.7,24,Math.PI/2);
- crate(5.4,26.6,.9,.2);crate(5.5,26.5,.7,.5,.9);bag(5.5,21);bag(6.2,21.4);barrel(78.4,22);barrel(77.6,21.5);bC(M.rust,.3,.9,78,.3,26.5,Math.PI/2,.7,0);
+ crate(5.4,26.6,.9,.2);crate(5.5,26.5,.7,.5,.9);bag(5.5,21);bag(6.2,21.4);barrel(70.4,21.6);barrel(69.6,22.4);bC(M.rust,.3,.9,78,.3,26.5,Math.PI/2,.7,0);
  // Security
  desk(6.4,5.4,Math.PI,true);chair(6.4,7.2,.4);bB(M.metal,.55,1.3,.6,15.5,.65,8.5);bB(M.dark,.4,.03,.02,15.2,.9,8.5);bB(M.metal,.55,1.3,.6,15.5,.65,9.2);poster(1,15.9,1.6,6.5,-Math.PI/2);
  // Storage
